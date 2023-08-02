@@ -1,0 +1,422 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Sudoku App</title>
+        <script>
+            // Class/function definitions go here.
+
+            board = [[],[],[],[],[],[],[],[],[]]; 
+              class Game {
+                constructor(board) {
+                  this.board = [];
+                  for(let i=0; i<9; i++) {
+                    this.board[i] = [];
+                    for(let j=0; j<9; j++) {
+                      this.board[i][j] = board[i][j];
+                    };
+                  };
+                };
+                
+                
+                //To display elements into the grids
+                displayGame() {
+                  //clears the board to help when tests refresh and to stop build up of cell items each time method is called
+                  for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                      $("#g" + i + "_" + j).empty();
+                    }
+                  }
+
+                  // two for loops to process through all groups
+                  for(let i=0; i<3; i++) {
+                    for(let j=0; j<3; j++) {
+                      //For group0_0
+                      if (i == 0 && j == 0) {
+                        for(let i=0; i<3; i++) {
+                          for(let j=0; j<3; j++) {
+                            let cell = this.board[i][j];
+                            $("#g0_0").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group0_1
+                      else if (i == 0 && j == 1) {
+                        for(let i=0; i<3; i++) {
+                          for(let j=3; j<6; j++) {
+                            let cell = this.board[i][j];
+                            $("#g0_1").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group0_2
+                      else if (i == 0 && j == 2) {
+                        for(let i=0; i<3; i++) {
+                          for(let j=6; j<9; j++) {
+                            let cell = this.board[i][j];
+                            $("#g0_2").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group1_0
+                      else if (i == 1 && j == 0) {
+                        for(let i=3; i<6; i++) {
+                          for(let j=0; j<3; j++) {
+                            let cell = this.board[i][j];
+                            $("#g1_0").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group1_1
+                      else if (i == 1 && j == 1) {
+                        for(let i=3; i<6; i++) {
+                          for(let j=3; j<6; j++) {
+                            let cell = this.board[i][j];
+                            $("#g1_1").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group1_2
+                      else if (i == 1 && j == 2) {
+                        for(let i=3; i<6; i++) {
+                          for(let j=6; j<9; j++) {
+                            let cell = this.board[i][j];
+                            $("#g1_2").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group2_0
+                      else if (i == 2 && j == 0) {
+                        for(let i=6; i<9; i++) {
+                          for(let j=0; j<3; j++) {
+                            let cell = this.board[i][j];
+                            $("#g2_0").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group2_1
+                      else if (i == 2 && j == 1) {
+                        for(let i=6; i<9; i++) {
+                          for(let j=3; j<6; j++) {
+                            let cell = this.board[i][j];
+                            $("#g2_1").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                      //For group2_2
+                      else if (i == 2 && j == 2) {
+                        for(let i=6; i<9; i++) {
+                          for(let j=6; j<9; j++) {
+                            let cell = this.board[i][j];
+                            $("#g2_2").append('<div class=\"cell\" id=\"cell_' + i + '_' + j + '\">' + cell + '</div>');
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+
+                //Check if the entry is valid
+                isValid(x, y) {
+                  //setup for all the variables used and calling methods
+                  let test = true;
+                  let test2 = 0;
+                  let test1_pass = true;
+                  let test2_pass = true;
+                  let group = getGroup(x, y);
+                  let cell = $('#cell_' + x + '_' + y).text();
+
+                  //to check all the elements in the group
+                  let groupnumbers=[];
+                  for(let i=0; i < group.length; i++) {
+                    let item = $("#cell_" + group[i][0] + "_" + group[i][1]).text();
+                    groupnumbers.push(item);
+                  }
+                  let test_group = new Set(groupnumbers).size;
+                  if (groupnumbers.length == test_group) {
+                    test1_pass = true;
+                  } else {
+                    test1_pass = false;
+                  }
+
+                  //to check the rows and columns 
+                  for(let i=0; i < 9; i++) {
+                    let down = this.board[i][y]
+                    let across = this.board[x][i]
+
+                    if (down == cell) {
+                      test2++;
+                      if (across == cell) {
+                        test2++;
+                      }                   
+                    } else if (across == cell) {
+                      test2++;
+                    }
+                  }
+                  if (test2 == 2) {
+                    test2_pass = true;
+                  }else {
+                    test2_pass = false;
+                  }
+
+                  //Checking both tests pass
+                  if (test1_pass == true && test2_pass == true) {
+                   test = true;
+                  } else {
+                    test = false;
+                  }
+                  return test;
+                }
+
+
+                //Method for showing possible integers a player could enter
+                suggest(x, y) {
+                  //setting up the arrays to reference against potential integers and calling the group method for working through elements
+                  let list = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                  let group = getGroup(x, y);
+                  let groupnumbers=[];
+                  let valid=[];
+
+                  //Grabs numbers used in the group
+                  for(let i=0; i < group.length; i++) {
+                    let item = $("#cell_" + group[i][0] + "_" + group[i][1]);
+                    let number = parseInt(item);
+                    groupnumbers.push(number);
+                  }
+
+                  //grabs the numbers from the row and columns wich are all put into an array with the group entrys
+                  for(let i=0; i < 9; i++) {
+                    let down = this.board[i][y]
+                    let across = this.board[x][i]
+                    groupnumbers.push(down);
+                    groupnumbers.push(across);
+                  }
+
+                  //Creating a unique array of numbers used that the selected cell is now not allowed to be.
+                  let test_group = Array.from(new Set(groupnumbers));
+
+                  //checks each number in the list of potential numbers a player can use and check if they match a number in the test_group using the includes method
+                  for(let i=0; i < list.length; i++) {
+                    let numCheck = list[i];
+                    let checker = test_group.includes(numCheck);
+                    if (checker != true) {
+                      valid.push(numCheck);
+                    }
+                  }
+                  //The valid array is then returned back to the button
+                  return valid;
+                }  
+              }
+              //To return groups that have been selected
+              function getGroup(x, y) {
+                let cell_id = 'cell_' + x + '_' + y;
+                let group = [];
+                let cell_g = $('#' + cell_id).parent().attr('id');
+                let g_cells = $('#' + cell_g).children();
+
+                for (let i = 0; i < g_cells.length; i++) {
+                  group[i] = [];
+                  let group_i = g_cells[i].id.split("_");
+                  group[i].push(group_i[1], group_i[2]);
+                }
+                return group;
+              }
+
+
+              //To highlight the cells when one has been selected
+              function highlightCell(x, y) {
+                for(let i=0; i < 9; i++) {
+                  for(let j=0; j <9;j++){
+                    $("#cell_" + i + "_" + j).css("background-color", "");
+                  }
+                }
+                
+                //console.log('highlight group');
+                //highlight group
+                let group = getGroup(x, y);
+                for(let i=0; i < group.length; i++) {
+                    let col = "#cell_" + group[i][0] + "_" + group[i][1];
+                    $(col).css("background-color", "#aaccff");
+                    //console.log($(col).text());
+                }
+
+                //console.log('highlight col, row');
+                //highlight collum, row
+                for(let i=0; i < 9; i++) {
+                  $('#cell_' + i + '_' + y).css("background-color", "#aaccff");
+                  $('#cell_' + x + '_' + i).css("background-color", "#aaccff");
+                  //console.log($('#cell_' + i + '_' + y).text() + ' ' + $('#cell_' + x + '_' + i).text());
+                }
+
+
+                //highlight selected element different to others
+                $('#cell_' + x + '_' + y).css("background-color", "#6699ff");
+                let cell = $('#cell_' + x + '_' + y);
+                //console.log('hightlight cell ' + cell.text());
+              }
+
+
+              //to update the integer in a cell
+              function cellUpdate(x, y, num) {
+                let cell = $('#cell_' + x + '_' + y);
+                cell.html(num);
+              }
+
+
+              //To check if the cell is applicable
+              function checkCell(game, x, y) {
+                //console.log(game.board);
+                // to fetch the current board being used because otherwise it only looks at an empty board
+                for(let i=0; i<9; i++) {
+                    for(let j=0; j<9; j++) {
+                      game.board[i][j] = $('#cell_' + i + '_' + j).text();
+                    };
+                  };
+                let test = game.isValid(x, y);
+                let cell = $('#cell_' + x + '_' + y);
+                if (test == false) {
+                  cell.css("background-color", "#ff0000");
+                } else {
+                  cell.css("background-color", "#00ff00");
+                }
+              }    
+
+            
+            //main buttons and event handlers
+            $(window).on("load", function() {
+              // Application code goes here.
+              let cell;
+              let game = new Game(this.board);
+              game.displayGame();
+
+              //cell on click inside the body to handle when the boards been inserted by the tests
+              $('body').on("click", ".cell", function(event) {
+                //let cell = this.id.split("_");
+                let cellid = event.target.id
+                cell= cellid.split("_");
+                //calling the highlight method and passing in the cell location
+                highlightCell(cell[1], cell[2]);
+              });
+
+              //event handler for the check cell
+              $('#checkCell').click(function () {
+                checkCell(game, cell[1], cell[2]);
+              });
+
+              //The clear message function to wipe the string clear
+              $('#clear').click(function clear() {
+                $('#message').html('');
+              });
+
+              //event handler for the update button which takes the cell location and passes in what ever is in the input 
+              $('#update').click(function () {
+                let num = $('#number').val();
+                  cellUpdate(cell[1], cell[2], num);
+              });
+
+              //help button event handler that calls the suggest method and displays the array retturned onto the board
+              $('#help').click(function () {
+                let array = [];
+                array = game.suggest(cell[1], cell[2]);
+                $('#message').html(array);
+              });
+            });
+
+
+        </script>
+        <style>
+            /* CSS code goes here. */
+            body {
+              background-color: #fcfcfc;
+              font-family: verdana;
+            }
+            #heading {
+              font-size: 36px;
+            }
+            #board {
+              width: 435px;
+              display: grid;
+              grid-template-columns: auto auto auto;
+            }
+            .group {
+              display: grid;
+              grid-template-columns: auto auto auto;
+              width: 141px;
+              border-width: 2px;
+              border-style: solid;
+              border-color: #969696;
+            }
+            .cell {
+              width: 35px;
+              margin: 0px;
+              padding: 3px;
+              border-width: 1px;
+              border-style: solid;
+              border-color: #cfcfcf;
+              float: left;
+              text-align: center;
+              font-size: 28px;
+              min-height: 35px;
+            }
+            .notok {
+              color: #ff0000;
+            }
+            .ok {
+              color: #00ff00;
+            }
+            .Game {
+
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Do not edit this section. -->
+        <div id="mocha"></div>
+
+        <script src="https://unpkg.com/chai/chai.js"></script>
+        <script src="https://unpkg.com/mocha/mocha.js"></script>
+
+        <script class="mocha-init">
+            mocha.setup('tdd');
+            mocha.checkLeaks();
+        </script>
+
+        <script src="COMP3006_SetEx_2022-23_Tests.js"></script>
+
+        <!-- Your HTML code goes here. -->
+        <h1 id='heading'>Sudoku</h1>
+        <!-- Div for Sudoku table compiler -->
+        <div id='board'>
+        <!-- Sudoku 9x9 box -->
+        <div id='g0_0' class='group'></div>
+        <div id='g0_1' class='group'></div>
+        <div id='g0_2' class='group'></div>
+
+        <div id='g1_0' class='group'></div>
+        <div id='g1_1' class='group'></div>
+        <div id='g1_2' class='group'></div>
+
+        <div id='g2_0' class='group'></div>
+        <div id='g2_1' class='group'></div>
+        <div id='g2_2' class='group'></div>
+        </div>
+        <!-- Buttons -->
+        <button id='checkCell'>Check Cell</button>
+        <button id='help'>Help</button>
+        <button id='clear'>Clear</button>
+        <button id='update'>Update</button>
+        <!-- input #number -->
+        <input type="number" id='number'></input>
+        <!-- paragraph -->
+        <p><span id='message'></span></p>
+        <!-- Do not edit this! -->
+        <script class="mocha-exec">
+            setTimeout(() => {
+                mocha.run();
+            }, 50);
+        </script>
+    </body>
+</html>
